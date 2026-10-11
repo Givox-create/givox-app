@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Givox Dashboard</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: "Segoe UI", system-ui, sans-serif;
+        background: #0f1115;
+        color: #f3f5f7;
+        display: flex;
+        justify-content: center;
+        padding: 32px 16px;
+      }
+
+      main {
+        width: min(560px, 100%);
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 1.6rem;
+      }
+
+      p.lead {
+        margin: 0 0 24px;
+        color: #9aa3ad;
+      }
+
+      form {
+        display: grid;
+        gap: 14px;
+        background: #171b22;
+        border: 1px solid #2a3140;
+        border-radius: 16px;
+        padding: 20px;
+      }
+
+      label {
+        display: grid;
+        gap: 6px;
+        font-size: 0.9rem;
+        color: #c5ccd4;
+      }
+
+      input {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #3a4354;
+        border-radius: 10px;
+        background: #0f131a;
+        color: inherit;
+        font-size: 1rem;
+      }
+
+      .presets {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .presets button {
+        border: 1px solid #3a4354;
+        background: #222834;
+        color: inherit;
+        border-radius: 999px;
+        padding: 8px 12px;
+        cursor: pointer;
+      }
+
+      .presets button:hover,
+      .presets button.active {
+        border-color: #6ea8fe;
+        background: #1c2a44;
+      }
+
+      .send {
+        margin-top: 6px;
+        width: 100%;
+        border: 0;
+        border-radius: 12px;
+        padding: 16px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        background: #4f8cff;
+        color: #061018;
+      }
+
+      .send:disabled {
+        opacity: 0.65;
+        cursor: wait;
+      }
+
+      #status {
+        display: none;
+        margin-top: 16px;
+        padding: 14px 16px;
+        border-radius: 12px;
+        line-height: 1.4;
+      }
+
+      #status.ok {
+        display: block;
+        background: #12351f;
+        border: 1px solid #2f9e60;
+      }
+
+      #status.error {
+        display: block;
+        background: #3a1518;
+        border: 1px solid #d35a63;
+      }
+
+      .section {
+        margin-top: 32px;
+        background: #171b22;
+        border: 1px solid #2a3140;
+        border-radius: 16px;
+        padding: 20px;
+      }
+
+      .section h2 {
+        margin: 0 0 16px;
+        font-size: 1.3rem;
+      }
+
+      .balance-display {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+      }
+
+      .balance-amount {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #ffd700;
+      }
+
+      .balance-label {
+        color: #9aa3ad;
+        font-size: 0.9rem;
+      }
+
+      .btn-secondary {
+        background: #222834;
+        color: inherit;
+        border: 1px solid #3a4354;
+        border-radius: 10px;
+        padding: 10px 16px;
+        cursor: pointer;
+        font-size: 0.9rem;
+      }
+
+      .btn-secondary:hover {
+        border-color: #6ea8fe;
+        background: #1c2a44;
+      }
+
+      .reload-form {
+        display: grid;
+        gap: 12px;
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid #2a3140;
+      }
+
+      .shop-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 16px;
+        margin-top: 16px;
+      }
+
+      .shop-item {
+        background: #0f131a;
+        border: 1px solid #3a4354;
+        border-radius: 12px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .shop-item h3 {
+        margin: 0;
+        font-size: 1rem;
+      }
+
+      .shop-item p {
+        margin: 0;
+        color: #9aa3ad;
+        font-size: 0.85rem;
+        flex-grow: 1;
+      }
+
+      .shop-item .cost {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #ffd700;
+      }
+
+      .shop-item button {
+        background: #4f8cff;
+        color: #061018;
+        border: 0;
+        border-radius: 8px;
+        padding: 10px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+
+      .shop-item button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .shop-item button:hover:not(:disabled) {
+        background: #3a7aee;
+      }
+
+      .history-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 16px;
+      }
+
+      .history-table th,
+      .history-table td {
+        text-align: left;
+        padding: 12px;
+        border-bottom: 1px solid #2a3140;
+      }
+
+      .history-table th {
+        color: #9aa3ad;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .history-table td {
+        font-size: 0.9rem;
+      }
+
+      .history-table tr:last-child td {
+        border-bottom: none;
+      }
+
+      .history-table .cost {
+        color: #ffd700;
+        font-weight: 600;
+      }
+
+      .history-table .date {
+        color: #9aa3ad;
+        font-size: 0.85rem;
+      }
+
+      .empty-history {
+        color: #9aa3ad;
+        font-style: italic;
+        padding: 20px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Dashboard de donaciones</h1>
+      <p class="lead">Envía una alerta al overlay y la guarda en Supabase.</p>
+
+      <form id="donation-form">
+        <label>
+          Nombre del donante
+          <input id="donorName" name="donorName" required placeholder="Caza" />
+        </label>
+        <label>
+          Nombre del regalo
+          <input id="giftName" name="giftName" required placeholder="Rose" />
+        </label>
+        <label>
+          URL del video (.webm)
+          <input
+            id="videoUrl"
+            name="videoUrl"
+            type="url"
+            required
+            placeholder="https://ejemplo.com/alerta.webm"
+          />
+        </label>
+
+        <div>
+          <p class="lead" style="margin-bottom: 8px">Regalos de prueba</p>
+          <div class="presets" id="presets"></div>
+        </div>
+
+        <button class="send" type="submit" id="send">Enviar Donación</button>
+      </form>
+
+      <div id="status" role="status"></div>
+
+      <div class="section">
+        <h2>Tienda de Monedas</h2>
+        <div class="balance-display">
+          <div>
+            <div class="balance-label">Tu saldo</div>
+            <div class="balance-amount" id="balance">0</div>
+          </div>
+          <button class="btn-secondary" id="refreshBalance">Actualizar</button>
+        </div>
+
+        <div class="reload-form">
+          <label>
+            <div class="balance-label">Cantidad de monedas a comprar</div>
+            <input id="coinAmount" type="number" min="1" value="100" />
+          </label>
+          <button class="send" id="buyCoins">Comprar Monedas</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Catálogo de Tienda</h2>
+        <div class="shop-grid" id="shopGrid"></div>
+      </div>
+
+      <div class="section">
+        <h2>Historial de Canjes</h2>
+        <table class="history-table" id="historyTable">
+          <thead>
+            <tr>
+              <th>Item</th>
+              <th>Costo</th>
+              <th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody id="historyBody"></tbody>
+        </table>
+      </div>
+    </main>
+
+    <script>
+      const presets = [
+        {
+          name: "Rose",
+          url: "https://dl8.webmfiles.org/big-buck-bunny_trailer.webm",
+        },
+        {
+          name: "Lion",
+          url: "https://dl8.webmfiles.org/elephants-dream.webm",
+        },
+        {
+          name: "Universe",
+          url: "https://filesamples.com/samples/video/webm/sample_640x360.webm",
+        },
+      ];
+
+      const form = document.getElementById("donation-form");
+      const donorName = document.getElementById("donorName");
+      const giftName = document.getElementById("giftName");
+      const videoUrl = document.getElementById("videoUrl");
+      const send = document.getElementById("send");
+      const status = document.getElementById("status");
+      const presetsEl = document.getElementById("presets");
+
+      presets.forEach((preset) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = preset.name;
+        button.addEventListener("click", () => {
+          giftName.value = preset.name;
+          videoUrl.value = preset.url;
+          document
+            .querySelectorAll(".presets button")
+            .forEach((el) => el.classList.remove("active"));
+          button.classList.add("active");
+        });
+        presetsEl.appendChild(button);
+      });
+
+      function showStatus(type, message) {
+        status.className = type;
+        status.textContent = message;
+      }
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        send.disabled = true;
+        showStatus("ok", "Enviando donación...");
+
+        try {
+          const response = await fetch("/api/donar", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              donorName: donorName.value.trim(),
+              giftName: giftName.value.trim(),
+              videoUrl: videoUrl.value.trim(),
+            }),
+          });
+
+          const data = await response.json().catch(() => ({}));
+
+          if (!response.ok || !data.ok) {
+            throw new Error(data.error || "No se pudo enviar la donación");
+          }
+
+          showStatus(
+            "ok",
+            `Donación enviada con éxito. ID: ${data.donationId}`
+          );
+        } catch (err) {
+          showStatus("error", err.message || "Error al enviar la donación");
+        } finally {
+          send.disabled = false;
+        }
+      });
+
+      // Tienda de monedas
+      const balanceEl = document.getElementById("balance");
+      const refreshBalanceBtn = document.getElementById("refreshBalance");
+      const coinAmount = document.getElementById("coinAmount");
+      const buyCoinsBtn = document.getElementById("buyCoins");
+      const shopGrid = document.getElementById("shopGrid");
+      const historyBody = document.getElementById("historyBody");
+
+      let currentUsername = "";
+
+      async function loadBalance() {
+        if (!currentUsername) {
+          balanceEl.textContent = "0";
+          return;
+        }
+
+        try {
+          const response = await fetch(`/api/coins/balance?username=${encodeURIComponent(currentUsername)}`);
+          const data = await response.json().catch(() => ({}));
+
+          if (response.ok && data.ok) {
+            balanceEl.textContent = data.balance;
+          } else {
+            balanceEl.textContent = "0";
+          }
+        } catch (err) {
+          console.error("Error cargando balance:", err);
+          balanceEl.textContent = "0";
+        }
+      }
+
+      async function loadShopItems() {
+        try {
+          const response = await fetch("/api/shop/items");
+          const data = await response.json().catch(() => ({}));
+
+          if (response.ok && data.ok) {
+            shopGrid.innerHTML = "";
+            data.items.forEach((item) => {
+              const itemEl = document.createElement("div");
+              itemEl.className = "shop-item";
+              itemEl.innerHTML = `
+                <h3>${item.name}</h3>
+                <p>${item.description || "Sin descripción"}</p>
+                <div class="cost">${item.cost} monedas</div>
+                <button onclick="redeemItem('${item.id}', ${item.cost}, '${item.name}')">Canjear</button>
+              `;
+              shopGrid.appendChild(itemEl);
+            });
+          } else {
+            shopGrid.innerHTML = "<p>Error cargando el catálogo</p>";
+          }
+        } catch (err) {
+          console.error("Error cargando items:", err);
+          shopGrid.innerHTML = "<p>Error cargando el catálogo</p>";
+        }
+      }
+
+      async function buyCoins() {
+        if (!currentUsername) {
+          showStatus("error", "Ingresa un nombre de donante primero");
+          return;
+        }
+
+        const amount = parseInt(coinAmount.value);
+        if (!amount || amount <= 0) {
+          showStatus("error", "Ingresa una cantidad válida");
+          return;
+        }
+
+        buyCoinsBtn.disabled = true;
+        showStatus("ok", "Procesando compra...");
+
+        try {
+          const response = await fetch("/api/coins/purchase", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              username: currentUsername,
+              amount,
+            }),
+          });
+
+          const data = await response.json().catch(() => ({}));
+
+          if (!response.ok || !data.ok) {
+            throw new Error(data.error || "No se pudo completar la compra");
+          }
+
+          showStatus("ok", `Compra exitosa. Nuevo saldo: ${data.newBalance}`);
+          loadBalance();
+        } catch (err) {
+          showStatus("error", err.message || "Error en la compra");
+        } finally {
+          buyCoinsBtn.disabled = false;
+        }
+      }
+
+      async function redeemItem(itemId, cost, itemName) {
+        if (!currentUsername) {
+          showStatus("error", "Ingresa un nombre de donante primero");
+          return;
+        }
+
+        if (!confirm(`¿Canjear "${itemName}" por ${cost} monedas?`)) {
+          return;
+        }
+
+        try {
+          const response = await fetch("/api/shop/redeem", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              username: currentUsername,
+              itemId,
+            }),
+          });
+
+          const data = await response.json().catch(() => ({}));
+
+          if (!response.ok || !data.ok) {
+            throw new Error(data.error || "No se pudo canjear el item");
+          }
+
+          showStatus("ok", `Canje exitoso: ${itemName}. Nuevo saldo: ${data.newBalance}`);
+          loadBalance();
+          loadRedemptionHistory();
+        } catch (err) {
+          showStatus("error", err.message || "Error en el canje");
+        }
+      }
+
+      async function loadRedemptionHistory() {
+        const historyBody = document.getElementById("historyBody");
+
+        if (!currentUsername) {
+          historyBody.innerHTML = '<tr><td colspan="3" class="empty-history">Ingresa un nombre de usuario para ver el historial</td></tr>';
+          return;
+        }
+
+        try {
+          const response = await fetch(`/api/redemptions/history?username=${encodeURIComponent(currentUsername)}`);
+          const data = await response.json().catch(() => ({}));
+
+          if (response.ok && data.ok) {
+            if (data.redemptions.length === 0) {
+              historyBody.innerHTML = '<tr><td colspan="3" class="empty-history">No hay canjes registrados</td></tr>';
+              return;
+            }
+
+            historyBody.innerHTML = data.redemptions.map((r) => {
+              const date = new Date(r.createdAt);
+              const formattedDate = date.toLocaleDateString('es-ES', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              });
+
+              return `
+                <tr>
+                  <td>${r.itemName}</td>
+                  <td class="cost">${r.coinsSpent} monedas</td>
+                  <td class="date">${formattedDate}</td>
+                </tr>
+              `;
+            }).join('');
+          } else {
+            historyBody.innerHTML = '<tr><td colspan="3" class="empty-history">Error cargando historial</td></tr>';
+          }
+        } catch (err) {
+          console.error("Error cargando historial:", err);
+          historyBody.innerHTML = '<tr><td colspan="3" class="empty-history">Error cargando historial</td></tr>';
+        }
+      }
+
+      // Watch for username changes
+      donorName.addEventListener("change", () => {
+        currentUsername = donorName.value.trim();
+        loadBalance();
+        loadRedemptionHistory();
+      });
+
+      refreshBalanceBtn.addEventListener("click", loadBalance);
+      buyCoinsBtn.addEventListener("click", buyCoins);
+
+      // Initialize shop and history
+      loadShopItems();
+      loadRedemptionHistory();
+    </script>
+  </body>
+</html>
